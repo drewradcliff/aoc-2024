@@ -1,21 +1,18 @@
-import { readFileSync } from "fs";
-import { join } from "path";
+import { dirname, join, fromFileUrl } from "@std/path";
 
-const inputPath = join(__dirname, "input.txt");
-const fileContents = readFileSync(inputPath, "utf-8");
+const inputPath = join(dirname(fromFileUrl(import.meta.url)), "input.txt");
+const data = Deno.readFileSync(inputPath);
+const decoder = new TextDecoder("utf-8");
+const fileContents = decoder.decode(data);
+const lines = fileContents.split("\n");
+const columns = lines.map((line) => line.split(/\s+/));
+const firstColumn: number[] = [];
+const secondColumn: number[] = [];
 
-const [firstColumn, secondColumn] = fileContents
-  .trim()
-  .split("\n")
-  .map((line) => line.split(/\s+/))
-  .reduce(
-    (acc, [num1, num2]) => {
-      acc[0].push(parseInt(num1));
-      acc[1].push(parseInt(num2));
-      return acc;
-    },
-    [[], []] as number[][]
-  );
+for (const [num1, num2] of columns) {
+  firstColumn.push(parseInt(num1));
+  secondColumn.push(parseInt(num2));
+}
 
 firstColumn.sort((a, b) => a - b);
 secondColumn.sort((a, b) => a - b);
@@ -28,5 +25,5 @@ const score = firstColumn.reduce((acc, curr) => {
   return acc + curr * secondColumn.filter((num) => num === curr).length;
 }, 0);
 
-console.log("Total distance: ", distance);
-console.log("Total similarity score: ", score);
+console.log("Distance:", distance);
+console.log("Score:", score);
